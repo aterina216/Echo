@@ -3,6 +3,7 @@ package com.example.echo.di
 import android.app.Application
 import android.content.Context
 import androidx.media3.exoplayer.ExoPlayer
+import com.example.echo.data.player.AudioVisualizer
 import com.example.echo.data.player.EchoPlayer
 import dagger.Module
 import dagger.Provides
@@ -25,4 +26,9 @@ object EchoPlayerModule {
     @Singleton
     fun provideEchoPlayer(player: ExoPlayer): EchoPlayer =
         EchoPlayer(player)
+
+    @Provides
+    @Singleton
+    fun provideAudioVisualizer(exoPlayer: ExoPlayer): AudioVisualizer =
+        AudioVisualizer(exoPlayer)
 }
