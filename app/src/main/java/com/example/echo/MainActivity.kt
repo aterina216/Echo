@@ -11,6 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.media3.exoplayer.ExoPlayer
+import com.example.echo.data.player.AudioVisualizer
 import com.example.echo.data.player.EchoPlayer
 import com.example.echo.ui.screens.EchoScreen
 import com.example.echo.ui.theme.EchoTheme
@@ -21,13 +23,20 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var echoPlayer: EchoPlayer
 
+    @Inject
+    lateinit var visualizer: AudioVisualizer
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        (application as EchoApplication).appComponent.inject(this)
-        super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
+        (application as EchoApplication).appComponent.inject(this)
+
         setContent {
             EchoTheme {
-                EchoScreen(echoPlayer)
+                EchoScreen(
+                    player = echoPlayer,
+                    visualizer = visualizer
+                )
             }
         }
     }

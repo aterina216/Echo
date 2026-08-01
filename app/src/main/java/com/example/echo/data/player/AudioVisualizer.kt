@@ -13,7 +13,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class AudioVisualizer(private val exoPlayer: ExoPlayer) {
 
     private var visualizer: Visualizer? = null
-    private val amplitudeFlow = MutableSharedFlow<Float>(0)
+    private val _amplitude = MutableStateFlow(0f)
+    val amplitudeFlow: Flow<Float> = _amplitude
 
     @OptIn(UnstableApi::class)
     fun start(): Flow<Float> {
@@ -41,18 +42,23 @@ class AudioVisualizer(private val exoPlayer: ExoPlayer) {
             visualizer = Visualizer(sessionId).apply {
                 captureSize = Visualizer.getCaptureSizeRange()[1]
                 setDataCaptureListener(
-                    object : Visualizer.OnDataCaptureListener{
+                    object : Visualizer.OnDataCaptureListener {
                         override fun onWaveFormDataCapture(
                             p0: Visualizer?,
                             p1: ByteArray?,
                             p2: Int
                         ) {
-                          if (p1 != null) {
-                              var sum = 0f
-                              for (b in p1) sum += (b * b).toFloat()
-                              val rms = Math.sqrt((sum/p1.size).toDouble()).toFloat()
-                              amplitudeFlow.tryEmit(rms/128f)
-                          }
+                            if (p1 != null) {
+                                var sum = 0f
+                                for (b in p1) {
+                                    val amp = (b.toInt() and 0xFF) - 128
+                                    sum += (amp *amp).toFloat()
+                                }
+                                val rms = Math.sqrt((sum/p1.size).toDouble()).toFloat()
+                                val level = (rms / 128f).coerceIn(0f, 1f)
+                               _amplitude.value = level
+                                Log.d("Visualizer", "level=$level")
+                            }
                         }
 
                         override fun onFftDataCapture(p0: Visualizer?, p1: ByteArray?, p2: Int) {
@@ -65,13 +71,12 @@ class AudioVisualizer(private val exoPlayer: ExoPlayer) {
                 )
                 enabled = true
             }
-        }
-        catch (e: Exception){
+        } catch (e: Exception) {
             Log.e("AudioVisualizer", "Failed to setup Visualizer", e)
         }
     }
 
-    fun stop(){
+    fun stop() {
         visualizer?.enabled = false
         visualizer?.release()
         visualizer = null
