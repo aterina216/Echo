@@ -38,8 +38,8 @@ object EchoPlayerModule {
         // USAGE_VOICE_COMMUNICATION и CONTENT_TYPE_SPEECH заставляют систему
         // направлять звук через software-путь, доступный для Visualizer.
         val audioAttributes = AudioAttributes.Builder()
-            .setUsage(C.USAGE_VOICE_COMMUNICATION)   // ← ключевое: не медиа, а голос
-            .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)     // ← речь вместо музыки
+            .setUsage(C.USAGE_MEDIA)   // ← ключевое: не медиа, а голос
+            .setContentType(AUDIO_CONTENT_TYPE_MUSIC)     // ← речь вместо музыки
             .build()
 
         return ExoPlayer.Builder(context)

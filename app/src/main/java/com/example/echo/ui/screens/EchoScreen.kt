@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.example.echo.data.player.AudioVisualData
 import com.example.echo.data.player.AudioVisualizer
 import com.example.echo.data.player.EchoPlayer
 import com.example.echo.ui.components.AudioVisualizerView
@@ -57,15 +58,14 @@ fun EchoScreen(player: EchoPlayer, visualizer: AudioVisualizer) {
     val streamUrl = "http://ice1.somafm.com/spacestation-128-mp3"
     val stationName = "Space Station Soma"
     val stationDescription = "Ambient, space music"
-    var amplitudeFlow by remember { mutableStateOf<Flow<Float>?>(null) }
-
+    var visualDataFlow by remember { mutableStateOf<Flow<AudioVisualData>?>(null) }
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
             player.play(streamUrl)
             isPlaying = true
-            amplitudeFlow = visualizer.start()
+            visualDataFlow = visualizer.start()
         }
     }
 
@@ -115,7 +115,7 @@ fun EchoScreen(player: EchoPlayer, visualizer: AudioVisualizer) {
                         player.pause()
                         isPlaying = false
                         visualizer.stop()
-                        amplitudeFlow = null
+                        visualDataFlow = null
                     } else {
                         if (ContextCompat.checkSelfPermission(
                                 context,
@@ -124,7 +124,7 @@ fun EchoScreen(player: EchoPlayer, visualizer: AudioVisualizer) {
                         ) {
                             player.play(streamUrl)
                             isPlaying = true
-                            amplitudeFlow = visualizer.start()
+                            visualDataFlow = visualizer.start()
                         } else {
                             permissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
                         }
@@ -145,13 +145,13 @@ fun EchoScreen(player: EchoPlayer, visualizer: AudioVisualizer) {
             Spacer(modifier = Modifier.height(48.dp))
 
             AnimatedVisibility(
-                visible = amplitudeFlow != null,
+                visible = visualDataFlow != null,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                amplitudeFlow?.let { flow ->
+                visualDataFlow?.let { flow ->
                     AudioVisualizerView(
-                        amplitudeFlow = flow,
+                        visualDataFlow = flow,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(100.dp)

@@ -35,17 +35,18 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
+import com.example.echo.data.player.AudioVisualData
 import kotlinx.coroutines.flow.Flow
 import kotlin.io.path.Path
 import kotlin.math.sin
 
 @Composable
-fun AudioVisualizerView(amplitudeFlow: Flow<Float>, modifier: Modifier = Modifier) {
+fun AudioVisualizerView(visualDataFlow: Flow<AudioVisualData>, modifier: Modifier = Modifier) {
 
-    val amplitude by amplitudeFlow.collectAsState(0f)
+    val visualData by visualDataFlow.collectAsState(AudioVisualData())
 
     val smoothAmplitude by animateFloatAsState(
-        targetValue = amplitude,
+        targetValue = visualData.amplitude,
         animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
         label = "smoothAmplitude"
     )
@@ -79,7 +80,7 @@ fun AudioVisualizerView(amplitudeFlow: Flow<Float>, modifier: Modifier = Modifie
 
         drawPath(
             path = path,
-            color = Color.White.copy(alpha = 0.8f),
+            color = visualData.color.copy(alpha = 0.8f),
             style = Stroke(
                 width = 4.dp.toPx(),
                 cap = StrokeCap.Round,
@@ -97,7 +98,7 @@ fun AudioVisualizerView(amplitudeFlow: Flow<Float>, modifier: Modifier = Modifie
 
         drawPath(
             path = path2,
-            color = Color.White.copy(alpha = 0.3f),
+            color = visualData.color.copy(alpha = 0.3f),
             style = Stroke(
                 width = 2.dp.toPx(),
                 cap = StrokeCap.Round,
