@@ -1,5 +1,6 @@
 package com.example.echo.ui.screens
 
+import android.R
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,8 +29,11 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -50,6 +54,7 @@ import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -57,6 +62,7 @@ import androidx.lifecycle.compose.rememberLifecycleOwner
 import com.example.echo.data.player.AudioVisualData
 import com.example.echo.data.player.AudioVisualizer
 import com.example.echo.data.player.EchoPlayer
+import com.example.echo.domain.model.defaultStations
 import com.example.echo.ui.components.AudioVisualizerView
 import com.example.echo.ui.components.TimerDialog
 import com.example.echo.util.SleepTimer
@@ -72,8 +78,9 @@ fun EchoScreen(player: EchoPlayer, visualizer: AudioVisualizer) {
     val context = LocalContext.current
     var isPlaying by remember { mutableStateOf(false) }
     val streamUrl = "http://ice1.somafm.com/spacestation-128-mp3"
-    val stationName = "Space Station Soma"
-    val stationDescription = "Ambient, space music"
+    val stations = remember { defaultStations() }
+    var currentStation by remember { mutableStateOf(stations.first()) }
+    var expanded by remember { mutableStateOf(false) }
     var visualDataFlow by remember { mutableStateOf<Flow<AudioVisualData>?>(null) }
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -107,7 +114,7 @@ fun EchoScreen(player: EchoPlayer, visualizer: AudioVisualizer) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = stationName,
+                text = currentStation.title,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Light,
                 color = Color.White.copy(alpha = 0.9f),
@@ -116,18 +123,58 @@ fun EchoScreen(player: EchoPlayer, visualizer: AudioVisualizer) {
 
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = stationDescription,
+                text = currentStation.description,
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White.copy(alpha = 0.9f),
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stationDescription,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.5f),
-                textAlign = TextAlign.Center
-            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Box{
+                OutlinedButton(
+                    onClick = {expanded = true},
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color.White
+                    ),
+                    border = ButtonDefaults.outlinedButtonBorder.copy(
+                        brush = Brush.linearGradient(listOf(Color.White.copy(alpha = 0.4f),
+                            Color.White.copy(alpha = 0.4f)))
+                    )
+                ) {
+                    Text("Сменить станцию")
+                }
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = {expanded = false},
+                    offset = DpOffset(x = 0.dp, y = 8.dp),
+                    modifier = Modifier.background(Color(0xFF1A1A2E))
+                ) {
+                    stations.forEach {
+                        station ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = station.title,
+                                    color = if (station.id == currentStation.id) Color.White else
+                                    Color.White.copy(alpha = 0.6f)
+                                )
+                            },
+                            onClick = {
+                                currentStation = station
+                                expanded = false
+                                if (isPlaying) {
+                                    player.play(station.url)
+                                    visualDataFlow = visualizer.start()
+                                }
+                            },
+                            modifier = Modifier.background(Color(0xFF1A1A2E))
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(48.dp))
 
             IconButton(
@@ -144,7 +191,7 @@ fun EchoScreen(player: EchoPlayer, visualizer: AudioVisualizer) {
                                 android.Manifest.permission.RECORD_AUDIO
                             ) == PackageManager.PERMISSION_GRANTED
                         ) {
-                            player.play(streamUrl)
+                            player.play(currentStation.url)
                             isPlaying = true
                             visualDataFlow = visualizer.start()
                         } else {
@@ -187,7 +234,7 @@ fun EchoScreen(player: EchoPlayer, visualizer: AudioVisualizer) {
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(40.dp)
+                .padding(35.dp)
         ) {
             if (isTimerActive) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
