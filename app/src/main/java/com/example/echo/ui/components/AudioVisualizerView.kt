@@ -41,13 +41,11 @@ import kotlin.io.path.Path
 import kotlin.math.sin
 
 @Composable
-fun AudioVisualizerView(visualDataFlow: Flow<AudioVisualData>, modifier: Modifier = Modifier) {
-
-    val visualData by visualDataFlow.collectAsState(AudioVisualData())
-
+fun AudioVisualizerView(audioData: AudioVisualData?, modifier: Modifier = Modifier) {
+    val targetAmplitude = audioData?.amplitude ?: 0f
     val smoothAmplitude by animateFloatAsState(
-        targetValue = visualData.amplitude,
-        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+        targetValue = targetAmplitude,
+        animationSpec = tween(300, easing = FastOutSlowInEasing),
         label = "smoothAmplitude"
     )
 
@@ -62,49 +60,38 @@ fun AudioVisualizerView(visualDataFlow: Flow<AudioVisualData>, modifier: Modifie
         label = "time"
     )
 
-    Canvas(modifier = modifier.fillMaxWidth().height(100.dp)){
+    val color = audioData?.color ?: Color(0xFF4FC3F7)
+
+    Canvas(modifier = modifier.fillMaxWidth().height(100.dp)) {
         val width = size.width
         val height = size.height
-        val centerY = height/2
+        val centerY = height / 2
         val waveAmplitude = (smoothAmplitude * height * 0.5f).coerceAtLeast(15f)
         val frequency = 0.015f
         val speed = 5f
         val path = Path()
-
         path.moveTo(0f, centerY)
-        for(x in 0..width.toInt() step 5) {
+        for (x in 0..width.toInt() step 5) {
             val phase = time * 2 * Math.PI.toFloat() * speed + x * frequency
             val y = centerY + sin(phase) * waveAmplitude
             path.lineTo(x.toFloat(), y)
         }
-
         drawPath(
             path = path,
-            color = visualData.color.copy(alpha = 0.8f),
-            style = Stroke(
-                width = 4.dp.toPx(),
-                cap = StrokeCap.Round,
-                join = StrokeJoin.Round
-            )
+            color = color.copy(alpha = 0.8f),
+            style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
         )
-
         val path2 = Path()
         path2.moveTo(0f, centerY)
-        for (x in 0.. width.toInt() step 5) {
+        for (x in 0..width.toInt() step 5) {
             val phase2 = time * speed * 0.7f + x * frequency * 1.5f + 2f
             val y2 = centerY + sin(phase2) * waveAmplitude * 0.6f
             path2.lineTo(x.toFloat(), y2)
         }
-
         drawPath(
             path = path2,
-            color = visualData.color.copy(alpha = 0.3f),
-            style = Stroke(
-                width = 2.dp.toPx(),
-                cap = StrokeCap.Round,
-                join = StrokeJoin.Round
-            )
+            color = color.copy(alpha = 0.3f),
+            style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
         )
     }
 }
-

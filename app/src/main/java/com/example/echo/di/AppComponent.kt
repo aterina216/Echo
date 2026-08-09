@@ -9,7 +9,7 @@ import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [EchoPlayerModule::class])
+@Component(modules = [EchoPlayerModule::class, RepositoryModule::class, ViewModuleFactoryModule::class])
 interface AppComponent {
 
     @Component.Builder

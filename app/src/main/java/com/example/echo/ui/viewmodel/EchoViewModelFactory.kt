@@ -1,0 +1,22 @@
+package com.example.echo.ui.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.echo.data.player.AudioVisualizer
+import com.example.echo.data.player.EchoPlayer
+import com.example.echo.data.repository.RadioRepository
+
+class EchoViewModelFactory(
+    private val player: EchoPlayer,
+    private val visualizer: AudioVisualizer,
+    private val repository: RadioRepository
+): ViewModelProvider.Factory {
+
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return EchoViewModel(
+            player = player,
+            visualizer = visualizer,
+            repository = repository
+        ) as T
+    }
+}

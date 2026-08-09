@@ -11,11 +11,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModelProvider
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.echo.data.player.AudioVisualizer
 import com.example.echo.data.player.EchoPlayer
 import com.example.echo.ui.screens.EchoScreen
 import com.example.echo.ui.theme.EchoTheme
+import com.example.echo.ui.viewmodel.EchoViewModel
+import com.example.echo.ui.viewmodel.EchoViewModelFactory
 import javax.inject.Inject
 
 class MainActivity : ComponentActivity() {
@@ -26,17 +29,19 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var visualizer: AudioVisualizer
 
+    @Inject
+    lateinit var factory: EchoViewModelFactory
+
+    lateinit var viewModel: EchoViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         (application as EchoApplication).appComponent.inject(this)
-
+        viewModel = ViewModelProvider(this, factory)[EchoViewModel::class]
         setContent {
             EchoTheme {
-                EchoScreen(
-                    player = echoPlayer,
-                    visualizer = visualizer
-                )
+                EchoScreen(viewModel)
             }
         }
     }
