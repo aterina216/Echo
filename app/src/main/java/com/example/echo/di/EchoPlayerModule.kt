@@ -9,11 +9,14 @@ import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC
+import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.echo.data.player.AudioVisualizer
 import com.example.echo.data.player.EchoPlayer
+import com.example.echo.data.player.ExoPlayerMusicPlayer
+import com.example.echo.domain.player.MusicPlayer
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -34,18 +37,21 @@ object EchoPlayerModule {
             audioManager.setAllowedCapturePolicy(AndroidAudioAttributes.ALLOW_CAPTURE_BY_ALL)
         }
 
-        // Используем AudioAttributes, которые отключают audio offload.
-        // USAGE_VOICE_COMMUNICATION и CONTENT_TYPE_SPEECH заставляют систему
-        // направлять звук через software-путь, доступный для Visualizer.
+        // Стандартные атрибуты, звук будет работать
         val audioAttributes = AudioAttributes.Builder()
-            .setUsage(C.USAGE_MEDIA)   // ← ключевое: не медиа, а голос
-            .setContentType(AUDIO_CONTENT_TYPE_MUSIC)     // ← речь вместо музыки
+            .setUsage(C.USAGE_MEDIA)
+            .setContentType(AUDIO_CONTENT_TYPE_MUSIC)
             .build()
 
         return ExoPlayer.Builder(context)
             .setAudioAttributes(audioAttributes, true)
             .build()
     }
+
+    @Provides
+    @Singleton
+    fun provideMusicPlayer(exoPlayer: ExoPlayer): MusicPlayer = ExoPlayerMusicPlayer(exoPlayer)
+
     @Provides
     @Singleton
     fun provideEchoPlayer(player: ExoPlayer): EchoPlayer =

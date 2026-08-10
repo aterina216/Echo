@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.echo.data.player.AudioVisualData
 import com.example.echo.data.player.AudioVisualizer
 import com.example.echo.data.player.EchoPlayer
+import com.example.echo.data.player.ExoPlayerMusicPlayer
 import com.example.echo.data.repository.RadioRepository
 import com.example.echo.domain.model.RadioStation
+import com.example.echo.domain.player.MusicPlayer
 import com.example.echo.util.SleepTimer
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class EchoViewModel(
-    private val player: EchoPlayer,
+    private val player: MusicPlayer,
     private val visualizer: AudioVisualizer,
     private val repository: RadioRepository
 ): ViewModel() {

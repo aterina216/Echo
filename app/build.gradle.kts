@@ -130,6 +130,6 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
     testImplementation("io.mockk:mockk:1.13.10")
     testImplementation("org.mockito:mockito-inline:5.2.0")
-    implementation("androidx.media3:media3-exoplayer:1.7.0")
-    implementation("androidx.media3:media3-exoplayer-hls:1.7.0")
+    implementation("androidx.media3:media3-exoplayer:1.4.1")
+    implementation("androidx.media3:media3-exoplayer-hls:1.4.1")
 }

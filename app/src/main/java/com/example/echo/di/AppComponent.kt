@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import com.example.echo.EchoApplication
 import com.example.echo.MainActivity
+import com.example.echo.service.EchoService
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -21,4 +22,5 @@ interface AppComponent {
 
     fun inject(app: EchoApplication)
     fun inject(activity: MainActivity)
+    fun inject(service: EchoService)
 }

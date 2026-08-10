@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.echo.data.player.AudioVisualizer
 import com.example.echo.data.player.EchoPlayer
+import com.example.echo.data.player.ExoPlayerMusicPlayer
 import com.example.echo.data.repository.RadioRepository
+import com.example.echo.domain.player.MusicPlayer
 
 class EchoViewModelFactory(
-    private val player: EchoPlayer,
+    private val player: MusicPlayer,
     private val visualizer: AudioVisualizer,
     private val repository: RadioRepository
 ): ViewModelProvider.Factory {
