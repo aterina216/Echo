@@ -14,7 +14,7 @@ class ViewModuleFactoryModule {
 
     @Provides
     fun provideViewModelFactory(
-        player: MusicPlayer,
+        player: EchoPlayer,
         visualizer: AudioVisualizer,
         repository: RadioRepository
     ): EchoViewModelFactory {

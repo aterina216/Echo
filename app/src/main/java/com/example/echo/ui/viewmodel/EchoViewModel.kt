@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class EchoViewModel(
-    private val player: MusicPlayer,
+    private val player: EchoPlayer,
     private val visualizer: AudioVisualizer,
     private val repository: RadioRepository
 ): ViewModel() {

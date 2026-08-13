@@ -2,8 +2,10 @@ package com.example.echo.ui.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -34,8 +36,11 @@ import com.example.echo.ui.components.TimerDialog
 import com.example.echo.ui.viewmodel.EchoViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.example.echo.service.startEchoService
 import com.example.echo.util.TimeFormatter.formatTime
+import com.example.echo.util.notifyPermission
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun EchoScreen(viewModel: EchoViewModel) {
     val context = LocalContext.current
@@ -56,7 +61,16 @@ fun EchoScreen(viewModel: EchoViewModel) {
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) viewModel.onPermissionGranted()
+        startEchoService(context, currentStation.url)
     }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+
+    }
+
+
 
     Box(
         modifier = Modifier
@@ -67,117 +81,122 @@ fun EchoScreen(viewModel: EchoViewModel) {
                 )
             )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = currentStation.title,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Light,
-                color = Color.White.copy(alpha = 0.9f),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = currentStation.description,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(24.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = currentStation.title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Light,
+                    color = Color.White.copy(alpha = 0.9f),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = currentStation.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // --- Выбор станции ---
-            Box {
-                OutlinedButton(
-                    onClick = { expanded = true },
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        brush = Brush.linearGradient(
-                            listOf(
-                                Color.White.copy(alpha = 0.4f),
-                                Color.White.copy(alpha = 0.4f)
+                // --- Выбор станции ---
+                Box {
+                    OutlinedButton(
+                        onClick = { expanded = true },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        border = ButtonDefaults.outlinedButtonBorder.copy(
+                            brush = Brush.linearGradient(
+                                listOf(
+                                    Color.White.copy(alpha = 0.4f),
+                                    Color.White.copy(alpha = 0.4f)
+                                )
                             )
                         )
-                    )
-                ) {
-                    Text("Сменить станцию")
-                }
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    offset = DpOffset(x = 0.dp, y = 8.dp),
-                    modifier = Modifier.background(Color(0xFF1A1A2E))
-                ) {
-                    viewModel.stations.forEach { station ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = station.title,
-                                    color = if (station.id == currentStation.id) Color.White
-                                    else Color.White.copy(alpha = 0.6f)
-                                )
-                            },
-                            onClick = {
-                                viewModel.selectStation(station)
-                                expanded = false
-                            },
-                            modifier = Modifier.background(Color(0xFF1A1A2E))
-                        )
+                    ) {
+                        Text("Сменить станцию")
                     }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            // --- Кнопка Play/Pause ---
-            IconButton(
-                onClick = {
-                    if (isPlaying) {
-                        viewModel.togglePlayPause()   // пауза
-                    } else {
-                        if (ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.RECORD_AUDIO
-                            ) == PackageManager.PERMISSION_GRANTED
-                        ) {
-                            viewModel.togglePlayPause()   // запуск
-                        } else {
-                            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        offset = DpOffset(x = 0.dp, y = 8.dp),
+                        modifier = Modifier.background(Color(0xFF1A1A2E))
+                    ) {
+                        viewModel.stations.forEach { station ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = station.title,
+                                        color = if (station.id == currentStation.id) Color.White
+                                        else Color.White.copy(alpha = 0.6f)
+                                    )
+                                },
+                                onClick = {
+                                    viewModel.selectStation(station)
+                                    expanded = false
+                                },
+                                modifier = Modifier.background(Color(0xFF1A1A2E))
+                            )
                         }
                     }
-                },
-                modifier = Modifier
-                    .size(96.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f))
-            ) {
-                Icon(
-                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (isPlaying) "Pause" else "Play",
-                    tint = Color.White,
-                    modifier = Modifier.size(48.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(24.dp))
+                }
 
-            // --- Визуализация ---
-            AnimatedVisibility(
-                visible = visualData != null,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                AudioVisualizerView(
-                    audioData = visualData,
+                Spacer(modifier = Modifier.height(48.dp))
+
+                // --- Кнопка Play/Pause ---
+                IconButton(
+                    onClick = {
+                        if (isPlaying) {
+                            viewModel.togglePlayPause()   // пауза
+                        } else {
+                            if (ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.RECORD_AUDIO
+                                ) == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                viewModel.togglePlayPause()
+                                startEchoService(context, currentStation.url)
+                            } else {
+                                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                            }
+                            if (!notifyPermission(context)) {
+                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                        }
+                    },
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                )
+                        .size(96.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.1f))
+                ) {
+                    Icon(
+                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = if (isPlaying) "Pause" else "Play",
+                        tint = Color.White,
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // --- Визуализация ---
+                AnimatedVisibility(
+                    visible = visualData != null,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    AudioVisualizerView(
+                        audioData = visualData,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp)
+                    )
+                }
             }
-        }
+
 
         // --- Таймер в правом верхнем углу ---
         Box(

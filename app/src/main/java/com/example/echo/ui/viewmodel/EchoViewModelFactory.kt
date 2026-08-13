@@ -9,7 +9,7 @@ import com.example.echo.data.repository.RadioRepository
 import com.example.echo.domain.player.MusicPlayer
 
 class EchoViewModelFactory(
-    private val player: MusicPlayer,
+    private val player: EchoPlayer,
     private val visualizer: AudioVisualizer,
     private val repository: RadioRepository
 ): ViewModelProvider.Factory {
