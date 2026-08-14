@@ -12,7 +12,7 @@ fun createNotificationChannel(context: Context, channelId: String, name: String)
         val channel = NotificationChannel(
             channelId,
             name,
-            NotificationManager.IMPORTANCE_HIGH
+            NotificationManager.IMPORTANCE_DEFAULT
         )
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(channel)
@@ -20,5 +20,17 @@ fun createNotificationChannel(context: Context, channelId: String, name: String)
     }
     else{
         Log.d("EchoApp", "API level < 26, channel not created")
+    }
+}
+
+fun createRemindersNotificationChannel(context: Context, channelId: String, name: String){
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        val channel = NotificationChannel(
+            channelId,
+            name,
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        val manager = context.getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(channel)
     }
 }
