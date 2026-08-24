@@ -9,7 +9,12 @@ import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -36,9 +41,16 @@ import com.example.echo.ui.components.TimerDialog
 import com.example.echo.ui.viewmodel.EchoViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import com.example.echo.service.startEchoService
+import com.example.echo.ui.components.menu
 import com.example.echo.util.TimeFormatter.formatTime
 import com.example.echo.util.notifyPermission
+import kotlinx.coroutines.delay
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
@@ -70,17 +82,50 @@ fun EchoScreen(viewModel: EchoViewModel) {
 
     }
 
+    var menuIsVisible by remember { mutableStateOf(false) }
+    var isDrownExpanded by remember { mutableStateOf(false) }
 
+    LaunchedEffect(menuIsVisible, isDrownExpanded) {
+        if(menuIsVisible && !isDrownExpanded){
+            delay(3000)
+            menuIsVisible = false
+        }
+    }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(Color(0xFF0D0D0D), Color(0xFF1A1A2E))
+    Scaffold(
+        topBar = {
+            AnimatedVisibility(
+                visible = menuIsVisible,
+                enter = slideInVertically(initialOffsetY = { -it }),
+                exit = slideOutVertically(targetOffsetY = { -it })
+            ) {
+                menu(modifier = Modifier,
+                    onExpandedChange = {isDrownExpanded = it})
+            }
+        }
+    )
+
+    { paddingValues ->
+
+        Box(modifier = Modifier.fillMaxWidth().height(100.dp)
+            .pointerInput(Unit){
+                detectTapGestures { menuIsVisible = !menuIsVisible }
+            }) {
+
+        }
+
+        Box(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.surface)
+                    )
                 )
-            )
-    ) {
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -92,14 +137,14 @@ fun EchoScreen(viewModel: EchoViewModel) {
                     text = currentStation.title,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Light,
-                    color = Color.White.copy(alpha = 0.9f),
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = currentStation.description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(24.dp))
@@ -108,12 +153,12 @@ fun EchoScreen(viewModel: EchoViewModel) {
                 Box {
                     OutlinedButton(
                         onClick = { expanded = true },
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
                         border = ButtonDefaults.outlinedButtonBorder.copy(
                             brush = Brush.linearGradient(
                                 listOf(
-                                    Color.White.copy(alpha = 0.4f),
-                                    Color.White.copy(alpha = 0.4f)
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primary
                                 )
                             )
                         )
@@ -124,22 +169,22 @@ fun EchoScreen(viewModel: EchoViewModel) {
                         expanded = expanded,
                         onDismissRequest = { expanded = false },
                         offset = DpOffset(x = 0.dp, y = 8.dp),
-                        modifier = Modifier.background(Color(0xFF1A1A2E))
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                     ) {
                         viewModel.stations.forEach { station ->
                             DropdownMenuItem(
                                 text = {
                                     Text(
                                         text = station.title,
-                                        color = if (station.id == currentStation.id) Color.White
-                                        else Color.White.copy(alpha = 0.6f)
+                                        color = if (station.id == currentStation.id) MaterialTheme.colorScheme.onSurface
+                                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                     )
                                 },
                                 onClick = {
                                     viewModel.selectStation(station)
                                     expanded = false
                                 },
-                                modifier = Modifier.background(Color(0xFF1A1A2E))
+                                modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                             )
                         }
                     }
@@ -171,13 +216,16 @@ fun EchoScreen(viewModel: EchoViewModel) {
                     modifier = Modifier
                         .size(96.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.1f))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                        .border(
+                            BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+                            CircleShape
+                        )
                 ) {
                     Icon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = if (isPlaying) "Pause" else "Play",
-                        tint = Color.White,
-                        modifier = Modifier.size(48.dp)
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
                 Spacer(modifier = Modifier.height(24.dp))
@@ -198,48 +246,49 @@ fun EchoScreen(viewModel: EchoViewModel) {
             }
 
 
-        // --- Таймер в правом верхнем углу ---
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(35.dp)
-        ) {
-            if (isTimerActive) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Timer,
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.7f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        formatTime(remainingMs),
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+            // --- Таймер в правом верхнем углу ---
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(35.dp)
+            ) {
+                if (isTimerActive) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Timer,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            formatTime(remainingMs),
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(
+                            onClick = { viewModel.cancelTimer() },
+                            modifier = Modifier.size(20.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Отменить таймер",
+                                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+                } else if (isPlaying) {
                     IconButton(
-                        onClick = { viewModel.cancelTimer() },
-                        modifier = Modifier.size(20.dp)
+                        onClick = { showTimerDialog = true },
+                        modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
-                            Icons.Default.Close,
-                            contentDescription = "Отменить таймер",
-                            tint = Color.White.copy(alpha = 0.7f)
+                            Icons.Default.Timer,
+                            contentDescription = "Установить таймер",
+                            tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                         )
                     }
-                }
-            } else if (isPlaying) {
-                IconButton(
-                    onClick = { showTimerDialog = true },
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Timer,
-                        contentDescription = "Установить таймер",
-                        tint = Color.White.copy(alpha = 0.6f)
-                    )
                 }
             }
         }

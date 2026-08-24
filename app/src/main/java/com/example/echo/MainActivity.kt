@@ -1,9 +1,11 @@
 package com.example.echo
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -15,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.echo.data.player.AudioVisualizer
 import com.example.echo.data.player.EchoPlayer
+import com.example.echo.ui.navigation.InitNavigation
 import com.example.echo.ui.screens.EchoScreen
 import com.example.echo.ui.theme.EchoTheme
 import com.example.echo.ui.viewmodel.EchoViewModel
@@ -34,6 +37,7 @@ class MainActivity : ComponentActivity() {
 
     lateinit var viewModel: EchoViewModel
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -41,7 +45,7 @@ class MainActivity : ComponentActivity() {
         viewModel = ViewModelProvider(this, factory)[EchoViewModel::class]
         setContent {
             EchoTheme {
-                EchoScreen(viewModel)
+                InitNavigation(viewModel)
             }
         }
     }

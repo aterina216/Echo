@@ -33,27 +33,27 @@ fun TimerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = {Text("Таймер сна", color = Color.White)},
+        title = {Text("Таймер сна", color = MaterialTheme.colorScheme.onBackground)},
         text = {
             Column {
-                Text("Введите количество минут", color = Color.White.copy(alpha = 0.7f))
+                Text("Введите количество минут", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = timerInput,
                     onValueChange = {newValue ->
                         if (newValue.all { it.isDigit() }) timerInput = newValue
                     },
-                    placeholder = {Text("0", color = Color.White.copy(alpha = 0.4f))},
+                    placeholder = {Text("0", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f))},
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color.White.copy(alpha = 0.5f),
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
-                        cursorColor = Color.White
+                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        focusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
+                        cursorColor = MaterialTheme.colorScheme.onBackground
                     ),
                     modifier = Modifier.fillMaxWidth(),
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.White)
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onBackground)
                 )
             }
         },
@@ -69,8 +69,8 @@ fun TimerDialog(
                 },
                 enabled = timerInput.isNotEmpty(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White.copy(alpha = 0.2f),
-                    contentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
+                    contentColor = MaterialTheme.colorScheme.onBackground
                 )
             ) {
                 Text("Установить")
@@ -78,10 +78,10 @@ fun TimerDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Отмена", color = Color.White.copy(alpha = 0.7f))
+                Text("Отмена", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
             }
         },
-        containerColor = Color(0xFF1A1A2E),
+        containerColor = MaterialTheme.colorScheme.surface,
         shape = MaterialTheme.shapes.medium
     )
 }
