@@ -39,20 +39,11 @@ fun EchoTheme(
     darkTheme: Boolean = true,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
+    themeOption: EchoThemeOption,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = darkColorScheme(
-        primary = Color(0xFF4FC3F7),        // голубой как в визуализации
-        onPrimary = Color.Black,
-        background = Color(0xFF0D0D0D),
-        onBackground = Color.White,
-        surface = Color(0xFF1A1A2E),
-        onSurface = Color.White,
-        secondary = Color(0xFF4FC3F7),
-        onSecondary = Color.Black,
-        surfaceVariant = Color(0xFF2A2A3E)
-    )
 
+    val colorScheme = themeOption.colorScheme()
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,

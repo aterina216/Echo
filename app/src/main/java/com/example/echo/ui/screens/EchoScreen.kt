@@ -54,7 +54,7 @@ import kotlinx.coroutines.delay
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun EchoScreen(viewModel: EchoViewModel) {
+fun EchoScreen(viewModel: EchoViewModel, onNavigateToSettings: () -> Unit) {
     val context = LocalContext.current
 
     // --- Состояния из ViewModel ---
@@ -85,6 +85,8 @@ fun EchoScreen(viewModel: EchoViewModel) {
     var menuIsVisible by remember { mutableStateOf(false) }
     var isDrownExpanded by remember { mutableStateOf(false) }
 
+    val themeOption by viewModel.themeOption.collectAsState()
+
     LaunchedEffect(menuIsVisible, isDrownExpanded) {
         if(menuIsVisible && !isDrownExpanded){
             delay(3000)
@@ -100,6 +102,12 @@ fun EchoScreen(viewModel: EchoViewModel) {
                 exit = slideOutVertically(targetOffsetY = { -it })
             ) {
                 menu(modifier = Modifier,
+                    onMenuItemclick = { item ->
+                        when (item) {
+                            "settings" -> onNavigateToSettings()
+                            // "about" -> ...
+                        }
+                    },
                     onExpandedChange = {isDrownExpanded = it})
             }
         }
@@ -122,7 +130,7 @@ fun EchoScreen(viewModel: EchoViewModel) {
                     brush = Brush.verticalGradient(
                         listOf(
                         MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.surface)
+                        themeOption.waveColorDark.copy(alpha = 0.2f))
                     )
                 )
         ) {
@@ -238,6 +246,7 @@ fun EchoScreen(viewModel: EchoViewModel) {
                 ) {
                     AudioVisualizerView(
                         audioData = visualData,
+                        themeOption,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(100.dp)

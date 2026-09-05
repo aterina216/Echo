@@ -7,8 +7,10 @@ import com.example.echo.data.player.AudioVisualizer
 import com.example.echo.data.player.EchoPlayer
 import com.example.echo.data.player.ExoPlayerMusicPlayer
 import com.example.echo.data.repository.RadioRepository
+import com.example.echo.data.repository.SettingsRepository
 import com.example.echo.domain.model.RadioStation
 import com.example.echo.domain.player.MusicPlayer
+import com.example.echo.ui.theme.EchoThemeOption
 import com.example.echo.util.SleepTimer
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +21,8 @@ import kotlinx.coroutines.launch
 class EchoViewModel(
     private val player: EchoPlayer,
     private val visualizer: AudioVisualizer,
-    private val repository: RadioRepository
+    private val repository: RadioRepository,
+    private val settingsRepository: SettingsRepository
 ): ViewModel() {
 
     val stations: List<RadioStation> = repository.getAllStations()
@@ -36,6 +39,18 @@ class EchoViewModel(
 
     private val _requestPermission = MutableSharedFlow<Unit>()
     val requestPermission: SharedFlow<Unit> = _requestPermission
+
+    private val _themeOption = MutableStateFlow(EchoThemeOption.BLUE)
+    val themeOption: StateFlow<EchoThemeOption> = _themeOption
+
+    init {
+        viewModelScope.launch {
+            settingsRepository.themeFlow.collect {
+                savedTheme ->
+                if (savedTheme != null) _themeOption.value = savedTheme
+            }
+        }
+    }
 
     fun selectStation(station: RadioStation){
         repository.setCurrentStation(station)
@@ -91,5 +106,12 @@ class EchoViewModel(
         super.onCleared()
         player.release()
         visualizer.stop()
+    }
+
+    fun setTheme(option: EchoThemeOption) {
+        viewModelScope.launch {
+            _themeOption.value = option
+            settingsRepository.saveTheme(option)
+        }
     }
 }

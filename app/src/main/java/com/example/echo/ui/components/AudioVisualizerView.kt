@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,12 +37,18 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import com.example.echo.data.player.AudioVisualData
+import com.example.echo.ui.functions.lerpColor
+import com.example.echo.ui.theme.EchoThemeOption
 import kotlinx.coroutines.flow.Flow
 import kotlin.io.path.Path
 import kotlin.math.sin
 
 @Composable
-fun AudioVisualizerView(audioData: AudioVisualData?, modifier: Modifier = Modifier) {
+fun AudioVisualizerView(
+    audioData: AudioVisualData?,
+    themeOption: EchoThemeOption,
+    modifier: Modifier = Modifier
+) {
     val targetAmplitude = audioData?.amplitude ?: 0f
     val smoothAmplitude by animateFloatAsState(
         targetValue = targetAmplitude,
@@ -60,9 +67,23 @@ fun AudioVisualizerView(audioData: AudioVisualData?, modifier: Modifier = Modifi
         label = "time"
     )
 
-    val color = audioData?.color ?: Color(0xFF4FC3F7)
+    val dark = themeOption.waveColorDark
+    val base = themeOption.waveColor
+    val light = themeOption.waveColorLight
 
-    Canvas(modifier = modifier.fillMaxWidth().height(100.dp)) {
+    val fraction = (sin(time * 2 * Math.PI.toFloat()) + 1f) / 2f
+
+    val waveColor = when {
+        fraction < 0.5f -> lerpColor(dark, base, fraction * 2f)
+        else -> lerpColor(base, light, (fraction - 0.5f) * 2f)
+    }
+
+    val mainWaveColor = waveColor.copy(alpha = 0.8f)
+    val secondWaveColor = waveColor.copy(alpha = 0.3f)
+
+    Canvas(modifier = modifier
+        .fillMaxWidth()
+        .height(100.dp)) {
         val width = size.width
         val height = size.height
         val centerY = height / 2
@@ -78,7 +99,7 @@ fun AudioVisualizerView(audioData: AudioVisualData?, modifier: Modifier = Modifi
         }
         drawPath(
             path = path,
-            color = color.copy(alpha = 0.8f),
+            color = mainWaveColor,
             style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
         )
         val path2 = Path()
@@ -90,7 +111,7 @@ fun AudioVisualizerView(audioData: AudioVisualData?, modifier: Modifier = Modifi
         }
         drawPath(
             path = path2,
-            color = color.copy(alpha = 0.3f),
+            color = secondWaveColor,
             style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
         )
     }
