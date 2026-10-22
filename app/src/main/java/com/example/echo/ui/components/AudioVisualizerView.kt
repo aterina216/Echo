@@ -44,7 +44,7 @@ import kotlin.io.path.Path
 import kotlin.math.sin
 
 @Composable
-fun AudioVisualizerView(
+fun WaveVisualizerView(
     audioData: AudioVisualData?,
     themeOption: EchoThemeOption,
     modifier: Modifier = Modifier

@@ -24,7 +24,9 @@ fun InitNavigation(viewModel: EchoViewModel) {
         composable("settings"){
             SettingsScreen(
                 currentTheme = viewModel.themeOption.collectAsState().value,
+                currentVisualization = viewModel.visualizationMode.collectAsState().value,
                 onThemeSelected = viewModel::setTheme,
+                onVisualizationSelected = viewModel::setVisualizationMode,
                 onBack = {navController.popBackStack()}
             )
         }

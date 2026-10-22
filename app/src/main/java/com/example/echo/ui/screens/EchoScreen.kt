@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.example.echo.ui.components.AudioVisualizerView
 import com.example.echo.ui.components.TimerDialog
 import com.example.echo.ui.viewmodel.EchoViewModel
 import androidx.compose.runtime.collectAsState
@@ -47,6 +46,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import com.example.echo.service.startEchoService
+import com.example.echo.ui.components.VisualizerSwitcher
+import com.example.echo.ui.components.WaveVisualizerView
 import com.example.echo.ui.components.menu
 import com.example.echo.util.TimeFormatter.formatTime
 import com.example.echo.util.notifyPermission
@@ -86,6 +87,7 @@ fun EchoScreen(viewModel: EchoViewModel, onNavigateToSettings: () -> Unit) {
     var isDrownExpanded by remember { mutableStateOf(false) }
 
     val themeOption by viewModel.themeOption.collectAsState()
+    val visualizationMode by viewModel.visualizationMode.collectAsState()
 
     LaunchedEffect(menuIsVisible, isDrownExpanded) {
         if(menuIsVisible && !isDrownExpanded){
@@ -244,12 +246,11 @@ fun EchoScreen(viewModel: EchoViewModel, onNavigateToSettings: () -> Unit) {
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {
-                    AudioVisualizerView(
-                        audioData = visualData,
-                        themeOption,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp)
+                    VisualizerSwitcher(
+                        mode = visualizationMode,
+                        audioVisualData = visualData,
+                        themeOption = themeOption,
+                        modifier = Modifier.fillMaxWidth().height(100.dp)
                     )
                 }
             }
