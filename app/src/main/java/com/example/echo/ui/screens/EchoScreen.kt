@@ -55,7 +55,8 @@ import kotlinx.coroutines.delay
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun EchoScreen(viewModel: EchoViewModel, onNavigateToSettings: () -> Unit) {
+fun EchoScreen(viewModel: EchoViewModel, onNavigateToSettings: () -> Unit,
+               onNavigateToAbout: () -> Unit) {
     val context = LocalContext.current
 
     // --- Состояния из ViewModel ---
@@ -107,7 +108,7 @@ fun EchoScreen(viewModel: EchoViewModel, onNavigateToSettings: () -> Unit) {
                     onMenuItemclick = { item ->
                         when (item) {
                             "settings" -> onNavigateToSettings()
-                            // "about" -> ...
+                            "about" -> onNavigateToAbout()
                         }
                     },
                     onExpandedChange = {isDrownExpanded = it})

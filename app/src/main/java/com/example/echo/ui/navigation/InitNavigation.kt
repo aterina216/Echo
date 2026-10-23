@@ -7,6 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.echo.ui.screens.AboutScreen
 import com.example.echo.ui.screens.EchoScreen
 import com.example.echo.ui.screens.SettingsScreen
 import com.example.echo.ui.viewmodel.EchoViewModel
@@ -19,16 +20,21 @@ fun InitNavigation(viewModel: EchoViewModel) {
 
     NavHost(navController, startDestination = "home") {
         composable("home") {
-            EchoScreen(viewModel, {navController.navigate("settings")})
+            EchoScreen(
+                viewModel, { navController.navigate("settings") },
+                {navController.navigate("about")})
         }
-        composable("settings"){
+        composable("settings") {
             SettingsScreen(
                 currentTheme = viewModel.themeOption.collectAsState().value,
                 currentVisualization = viewModel.visualizationMode.collectAsState().value,
                 onThemeSelected = viewModel::setTheme,
                 onVisualizationSelected = viewModel::setVisualizationMode,
-                onBack = {navController.popBackStack()}
+                onBack = { navController.popBackStack() }
             )
+        }
+        composable("about") {
+            AboutScreen(onBack = { navController.popBackStack() })
         }
     }
 }
