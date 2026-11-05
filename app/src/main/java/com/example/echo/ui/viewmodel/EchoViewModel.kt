@@ -13,6 +13,7 @@ import com.example.echo.domain.player.MusicPlayer
 import com.example.echo.ui.theme.EchoThemeOption
 import com.example.echo.ui.theme.VisualizationMode
 import com.example.echo.util.SleepTimer
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -23,7 +24,8 @@ class EchoViewModel(
     private val player: EchoPlayer,
     private val visualizer: AudioVisualizer,
     private val repository: RadioRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    val sleepTimer: SleepTimer
 ) : ViewModel() {
 
     val stations: List<RadioStation> = repository.getAllStations()
@@ -35,7 +37,6 @@ class EchoViewModel(
     private val _visualData = MutableStateFlow<AudioVisualData?>(null)
     val visualData: StateFlow<AudioVisualData?> = _visualData
 
-    val sleepTimer = SleepTimer()
     val remainings: StateFlow<Long> = sleepTimer.remainings
 
     private val _requestPermission = MutableSharedFlow<Unit>()
@@ -46,6 +47,8 @@ class EchoViewModel(
 
     private var _visualizationMode = MutableStateFlow(VisualizationMode.WAVE)
     val visualizationMode: StateFlow<VisualizationMode> = _visualizationMode
+
+    private var visualizerJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -86,7 +89,8 @@ class EchoViewModel(
     private fun play() {
         player.play(currentStation.value.url)
         _isPlaying.value = true
-        viewModelScope.launch {
+        visualizerJob?.cancel()
+        visualizerJob =  viewModelScope.launch {
             visualizer.start().collect { data ->
                 _visualData.value = data
             }
@@ -94,6 +98,8 @@ class EchoViewModel(
     }
 
     private fun pause() {
+        visualizerJob?.cancel()
+        visualizerJob = null
         player.pause()
         visualizer.stop()
         _isPlaying.value = false

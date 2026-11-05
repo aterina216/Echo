@@ -7,6 +7,7 @@ import com.example.echo.data.repository.RadioRepository
 import com.example.echo.data.repository.SettingsRepository
 import com.example.echo.domain.player.MusicPlayer
 import com.example.echo.ui.viewmodel.EchoViewModelFactory
+import com.example.echo.util.SleepTimer
 import dagger.Module
 import dagger.Provides
 
@@ -18,8 +19,12 @@ class ViewModuleFactoryModule {
         player: EchoPlayer,
         visualizer: AudioVisualizer,
         repository: RadioRepository,
-        settingsRepository: SettingsRepository
+        settingsRepository: SettingsRepository,
+        timer: SleepTimer
     ): EchoViewModelFactory {
-        return EchoViewModelFactory(player, visualizer, repository, settingsRepository)
+        return EchoViewModelFactory(player, visualizer, repository, settingsRepository, timer)
     }
+
+    @Provides
+    fun provideSleepTimer() = SleepTimer()
 }

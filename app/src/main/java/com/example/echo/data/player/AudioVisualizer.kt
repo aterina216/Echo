@@ -14,10 +14,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class AudioVisualizer(private val exoPlayer: ExoPlayer) {
 
     private var visualizer: Visualizer? = null
+    private var sessionListener: Player.Listener? = null
     private var _visualData = MutableStateFlow(AudioVisualData())
     val visualData: Flow<AudioVisualData> = _visualData
 
-    @OptIn(UnstableApi::class)
+    /*@OptIn(UnstableApi::class)
     fun start(): Flow<AudioVisualData> {
         val sessionId = exoPlayer.audioSessionId
         if (sessionId == 0) {
@@ -31,6 +32,31 @@ class AudioVisualizer(private val exoPlayer: ExoPlayer) {
                 }
             })
         } else {
+            setupVisualizer(sessionId)
+        }
+        return visualData
+    }*/
+
+    @OptIn(UnstableApi::class)
+    fun start(): Flow<AudioVisualData> {
+        val sessionId = exoPlayer.audioSessionId
+        if(sessionId == 0){
+            val listener = object : Player.Listener{
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if(playbackState == Player.STATE_READY){
+                        val id = exoPlayer.audioSessionId
+                        if (id != 0) {
+                            setupVisualizer(id)
+                            exoPlayer.removeListener(this)
+                            sessionListener = null
+                        }
+                    }
+                }
+            }
+            sessionListener = listener
+            exoPlayer.addListener(listener)
+        }
+        else {
             setupVisualizer(sessionId)
         }
         return visualData
@@ -88,6 +114,8 @@ class AudioVisualizer(private val exoPlayer: ExoPlayer) {
     }
 
     fun stop() {
+        sessionListener?.let { exoPlayer.removeListener(it) }
+        sessionListener = null
         visualizer?.enabled = false
         visualizer?.release()
         visualizer = null

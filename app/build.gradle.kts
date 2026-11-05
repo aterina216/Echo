@@ -40,6 +40,13 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    packaging {
+        resources {
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/LICENSE-notice.md"
+        }
+    }
 }
 
 dependencies {
@@ -132,4 +139,14 @@ dependencies {
     testImplementation("org.mockito:mockito-inline:5.2.0")
     implementation("androidx.media3:media3-exoplayer:1.4.1")
     implementation("androidx.media3:media3-exoplayer-hls:1.4.1")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    testImplementation("io.mockk:mockk:1.13.16")
+    testImplementation("app.cash.turbine:turbine:1.1.0")
+    androidTestImplementation("io.mockk:mockk-android:1.13.13")
+
+    testImplementation("org.robolectric:robolectric:4.17")
+    testImplementation("androidx.test.ext:junit:1.3.0")
+    testImplementation("androidx.work:work-testing:2.9.0")
 }

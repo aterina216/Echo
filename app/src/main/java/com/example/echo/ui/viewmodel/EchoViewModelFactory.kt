@@ -8,12 +8,15 @@ import com.example.echo.data.player.ExoPlayerMusicPlayer
 import com.example.echo.data.repository.RadioRepository
 import com.example.echo.data.repository.SettingsRepository
 import com.example.echo.domain.player.MusicPlayer
+import com.example.echo.util.SleepTimer
+import kotlin.concurrent.timer
 
 class EchoViewModelFactory(
     private val player: EchoPlayer,
     private val visualizer: AudioVisualizer,
     private val repository: RadioRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    val timer: SleepTimer
 ): ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -21,7 +24,8 @@ class EchoViewModelFactory(
             player = player,
             visualizer = visualizer,
             repository = repository,
-            settingsRepository
+            settingsRepository,
+            timer
         ) as T
     }
 }
