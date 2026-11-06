@@ -6,6 +6,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -45,13 +47,24 @@ class EchoService: Service() {
                 }
 
                 val notification = buildNotification(true)
-                startForeground(notificationId, notification)
+
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE){
+                    startForeground(notificationId, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+                }
+                else {
+                    startForeground(notificationId, notification)
+                }
                 Log.d("EchoService", "startForeground выполнен")
             }
             ACTION_PAUSE -> {
                 musicPlayer.pause()
                 val notification = buildNotification(false)
-                startForeground(notificationId, notification)
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE){
+                    startForeground(notificationId, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+                }
+                else {
+                    startForeground(notificationId, notification)
+                }
             }
             ACTION_STOP -> {
                 musicPlayer.pause()
@@ -59,7 +72,7 @@ class EchoService: Service() {
                 stopSelf()
             }
         }
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     private fun updateNotification() {
